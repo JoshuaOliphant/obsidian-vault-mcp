@@ -29,6 +29,7 @@ class FileData:
     relative_path: str
     outgoing_links: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
+    aliases: list[str] = field(default_factory=list)
     word_count: int = 0
     confidence_markers: list[str] = field(default_factory=list)
 
@@ -184,22 +185,37 @@ class VaultIndex:
     # ── internal helpers ──────────────────────────────────────────────
 
     def _find_file(self, data: VaultData, note_name: str) -> Optional[FileData]:
-        """Find a FileData by relative path or stem match."""
+        """Find a FileData by relative path, stem, or alias match.
+
+        Obsidian resolves wiki-links case-insensitively and normalizes
+        spaces/dashes, so we do the same here. Also checks frontmatter aliases.
+        """
         # Try exact relative path (with or without .md)
         if note_name in data.files:
             return data.files[note_name]
         if note_name + ".md" in data.files:
             return data.files[note_name + ".md"]
 
-        # Try stem match (last component without extension)
         target_stem = note_name.rsplit("/", 1)[-1] if "/" in note_name else note_name
+        target_normalized = _normalize_for_match(target_stem)
+
         for rel_path, fdata in data.files.items():
-            if Path(rel_path).stem == target_stem:
+            # Case-insensitive stem match with space/dash normalization
+            if _normalize_for_match(Path(rel_path).stem) == target_normalized:
                 return fdata
+            # Check frontmatter aliases
+            for alias in fdata.aliases:
+                if _normalize_for_match(alias) == target_normalized:
+                    return fdata
         return None
 
 
 # ── pure functions (ported from vault-index.py) ───────────────────────
+
+
+def _normalize_for_match(name: str) -> str:
+    """Normalize a note name for matching: lowercase, spaces and dashes equivalent."""
+    return name.lower().replace("-", " ")
 
 
 def collect_files(
@@ -278,6 +294,49 @@ def parse_frontmatter_tags(frontmatter: str) -> list[str]:
     return tags
 
 
+def parse_frontmatter_aliases(frontmatter: str) -> list[str]:
+    """Extract aliases from YAML frontmatter text.
+
+    Handles both formats:
+      aliases: [alias1, alias2]
+      aliases:
+        - alias1
+        - alias2
+    """
+    aliases: list[str] = []
+
+    lines = frontmatter.split("\n")
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+
+        # Inline format: aliases: [a, b]
+        match = re.match(r"^aliases:\s*\[([^\]]*)\]", stripped)
+        if match:
+            raw = match.group(1)
+            for alias in raw.split(","):
+                alias = alias.strip().strip("'\"")
+                if alias:
+                    aliases.append(alias)
+            return aliases
+
+        # List format: aliases: followed by - items
+        if re.match(r"^aliases:\s*$", stripped):
+            for j in range(i + 1, len(lines)):
+                list_line = lines[j]
+                list_match = re.match(r"^\s+-\s+(.+)$", list_line)
+                if list_match:
+                    alias = list_match.group(1).strip().strip("'\"")
+                    if alias:
+                        aliases.append(alias)
+                elif list_line.strip() == "":
+                    continue
+                else:
+                    break
+            return aliases
+
+    return aliases
+
+
 def extract_inline_tags(body: str) -> list[str]:
     """Extract inline #tag patterns from body text, skipping headings and code blocks."""
     tags: set[str] = set()
@@ -323,6 +382,7 @@ def parse_file(path: Path, vault_path: Path) -> FileData:
 
     frontmatter_text, body = extract_frontmatter(content)
     fm_tags = parse_frontmatter_tags(frontmatter_text)
+    fm_aliases = parse_frontmatter_aliases(frontmatter_text)
     inline_tags = extract_inline_tags(body)
 
     # Merge and deduplicate, preserving order (frontmatter first)
@@ -343,6 +403,7 @@ def parse_file(path: Path, vault_path: Path) -> FileData:
         relative_path=rel_path,
         outgoing_links=outgoing_links,
         tags=all_tags,
+        aliases=fm_aliases,
         word_count=word_count,
         confidence_markers=markers,
     )
