@@ -182,8 +182,7 @@ def refresh_index() -> RefreshResult:
     """
     index = _get_index()
     index.invalidate_cache()
-    stats = index.vault_stats()
-    return RefreshResult(refreshed=True, total_files=stats["total_files"])
+    return RefreshResult(refreshed=True, total_files=index.file_count())
 
 
 def main() -> None:

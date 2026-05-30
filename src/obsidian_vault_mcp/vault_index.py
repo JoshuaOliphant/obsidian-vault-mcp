@@ -113,6 +113,10 @@ class VaultIndex:
 
     # ── public query methods ──────────────────────────────────────────
 
+    def file_count(self) -> int:
+        """Number of markdown files in the (loaded) index."""
+        return len(self._ensure_loaded().files)
+
     def get_backlinks(self, note_name: str) -> list[BacklinkEntry]:
         """Find all notes that link to a given note name (stem or path)."""
         data = self._ensure_loaded()
