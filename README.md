@@ -106,6 +106,9 @@ uv run pytest tests/ -v
 # Lint
 uv run ruff check src tests
 
+# Type check
+uv run ty check src tests
+
 # Run the server directly
 OBSIDIAN_VAULT_PATH=/path/to/vault uv run python -m obsidian_vault_mcp
 ```

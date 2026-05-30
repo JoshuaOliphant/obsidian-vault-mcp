@@ -75,9 +75,11 @@ class VaultIndex:
         return (time.time() - self._data.scanned_at) < self._config.cache_ttl
 
     def _ensure_loaded(self) -> VaultData:
-        if not self._is_cache_valid():
-            self._data = self._scan()
-        return self._data  # type: ignore[return-value]
+        data = self._data
+        if data is None or not self._is_cache_valid():
+            data = self._scan()
+            self._data = data
+        return data
 
     def invalidate_cache(self) -> None:
         """Force a rescan on the next query."""

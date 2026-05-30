@@ -26,6 +26,7 @@ dev = [
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "ruff>=0.10.0",
+    "ty>=0.0.1a1",
 ]
 
 [tool.pytest.ini_options]
@@ -35,6 +36,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+[tool.ty.environment]
+python-version = "3.11"
 
 [tool.ruff]
 line-length = 100
