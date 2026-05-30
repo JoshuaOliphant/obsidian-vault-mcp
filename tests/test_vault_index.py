@@ -3,15 +3,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
 from obsidian_vault_mcp.config import VaultConfig
 from obsidian_vault_mcp.vault_index import (
     WIKI_LINK_RE,
     BacklinkEntry,
-    BrokenLinkEntry,
     FileData,
     VaultIndex,
     build_backlinks,
@@ -25,7 +20,6 @@ from obsidian_vault_mcp.vault_index import (
     parse_file,
     parse_frontmatter_tags,
 )
-
 
 # ── Wiki-link regex ───────────────────────────────────────────────────
 

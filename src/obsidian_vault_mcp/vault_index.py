@@ -505,7 +505,9 @@ def find_unresolved_with_locations(
     # Find locations of each broken link
     broken: list[BrokenLinkEntry] = []
     for rel_path, fdata in files.items():
-        file_broken = [l for l in fdata.outgoing_links if l in unresolved_targets]
+        file_broken = [
+            link for link in fdata.outgoing_links if link in unresolved_targets
+        ]
         if not file_broken:
             continue
 

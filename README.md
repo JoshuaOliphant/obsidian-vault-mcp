@@ -6,7 +6,12 @@ An MCP (Model Context Protocol) server that exposes your Obsidian vault's link g
 
 Obsidian has great graph features in the GUI, but there's no programmatic way for AI agents to query your vault's structure. Existing MCP servers for Obsidian are either unmaintained or lack graph-aware tooling.
 
-This server parses your vault's markdown files, builds an in-memory link graph, and exposes it through 6 focused tools.
+This server parses your vault's markdown files, builds an in-memory link graph, and exposes it through 7 focused tools.
+
+Built on [FastMCP 3](https://gofastmcp.com/). All query tools return [structured
+content](https://modelcontextprotocol.io/specification/2025-11-25) with output
+schemas and carry read-only [tool annotations](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
+(`readOnlyHint`, `idempotentHint`), so MCP clients know they're safe to call.
 
 ## Tools
 
@@ -18,6 +23,7 @@ This server parses your vault's markdown files, builds an in-memory link graph, 
 | `find_orphaned_notes` | Find files with no inbound links |
 | `get_note_info` | Get metadata for a note (tags, word count, link counts) |
 | `vault_stats` | Overall vault health summary |
+| `refresh_index` | Force a rescan after editing notes on disk |
 
 ## Setup
 
@@ -79,6 +85,9 @@ Once registered, the tools are available in Claude Code:
 
 > How healthy is my vault?
 # Claude calls vault_stats()
+
+> I just edited a bunch of notes — re-scan the vault
+# Claude calls refresh_index()
 ```
 
 ## Performance
@@ -93,6 +102,9 @@ Tested on a 1,100-file vault:
 ```bash
 # Run tests
 uv run pytest tests/ -v
+
+# Lint
+uv run ruff check src tests
 
 # Run the server directly
 OBSIDIAN_VAULT_PATH=/path/to/vault uv run python -m obsidian_vault_mcp
