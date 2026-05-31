@@ -9,6 +9,7 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
+from obsidian_vault_mcp import __version__
 from obsidian_vault_mcp.config import VaultConfig
 from obsidian_vault_mcp.vault_index import BacklinkEntry, BrokenLinkEntry, VaultIndex
 
@@ -27,7 +28,7 @@ Available tools:
 The vault is scanned once and cached; query results may be up to OBSIDIAN_CACHE_TTL
 seconds stale. Call refresh_index after the user edits notes to see changes immediately."""
 
-mcp = FastMCP("obsidian-vault", instructions=SERVER_INSTRUCTIONS)
+mcp = FastMCP("obsidian-vault", instructions=SERVER_INSTRUCTIONS, version=__version__)
 
 # Annotations shared by the read-only query tools: they only read the vault,
 # repeated calls return the same result, and they never touch external systems.

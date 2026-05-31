@@ -1,6 +1,6 @@
 [project]
 name = "obsidian-vault-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for querying Obsidian vault graph data — backlinks, orphans, broken links, and more"
 readme = "README.md"
 authors = [
