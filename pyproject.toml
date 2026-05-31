@@ -1,6 +1,6 @@
 [project]
 name = "obsidian-vault-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for querying Obsidian vault graph data — backlinks, orphans, broken links, and more"
 readme = "README.md"
 authors = [
@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "fastmcp>=2.0.0",
+    "fastmcp>=3.3.1",
 ]
 
 [project.scripts]
@@ -25,6 +25,8 @@ packages = ["src/obsidian_vault_mcp"]
 dev = [
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
+    "ruff>=0.10.0",
+    "ty>=0.0.1a1",
 ]
 
 [tool.pytest.ini_options]
@@ -34,6 +36,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+[tool.ty.environment]
+python-version = "3.11"
 
 [tool.ruff]
 line-length = 100

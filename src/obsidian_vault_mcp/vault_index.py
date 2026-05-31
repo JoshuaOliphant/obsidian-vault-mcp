@@ -75,9 +75,11 @@ class VaultIndex:
         return (time.time() - self._data.scanned_at) < self._config.cache_ttl
 
     def _ensure_loaded(self) -> VaultData:
-        if not self._is_cache_valid():
-            self._data = self._scan()
-        return self._data  # type: ignore[return-value]
+        data = self._data
+        if data is None or not self._is_cache_valid():
+            data = self._scan()
+            self._data = data
+        return data
 
     def invalidate_cache(self) -> None:
         """Force a rescan on the next query."""
@@ -112,6 +114,10 @@ class VaultIndex:
         )
 
     # ── public query methods ──────────────────────────────────────────
+
+    def file_count(self) -> int:
+        """Number of markdown files in the (loaded) index."""
+        return len(self._ensure_loaded().files)
 
     def get_backlinks(self, note_name: str) -> list[BacklinkEntry]:
         """Find all notes that link to a given note name (stem or path)."""
@@ -505,7 +511,9 @@ def find_unresolved_with_locations(
     # Find locations of each broken link
     broken: list[BrokenLinkEntry] = []
     for rel_path, fdata in files.items():
-        file_broken = [l for l in fdata.outgoing_links if l in unresolved_targets]
+        file_broken = [
+            link for link in fdata.outgoing_links if link in unresolved_targets
+        ]
         if not file_broken:
             continue
 

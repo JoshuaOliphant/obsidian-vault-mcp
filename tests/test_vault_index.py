@@ -3,15 +3,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
 from obsidian_vault_mcp.config import VaultConfig
 from obsidian_vault_mcp.vault_index import (
     WIKI_LINK_RE,
     BacklinkEntry,
-    BrokenLinkEntry,
     FileData,
     VaultIndex,
     build_backlinks,
@@ -25,7 +20,6 @@ from obsidian_vault_mcp.vault_index import (
     parse_file,
     parse_frontmatter_tags,
 )
-
 
 # ── Wiki-link regex ───────────────────────────────────────────────────
 
@@ -455,10 +449,12 @@ class TestVaultIndexCaching:
 
         # First call triggers scan
         index.vault_stats()
+        assert index._data is not None
         scan_time_1 = index._data.scanned_at
 
         # Second call should use cache
         index.vault_stats()
+        assert index._data is not None
         scan_time_2 = index._data.scanned_at
 
         assert scan_time_1 == scan_time_2
@@ -474,10 +470,12 @@ class TestVaultIndexCaching:
         index = VaultIndex(config)
 
         index.vault_stats()
+        assert index._data is not None
         scan_time_1 = index._data.scanned_at
 
         index.invalidate_cache()
         index.vault_stats()
+        assert index._data is not None
         scan_time_2 = index._data.scanned_at
 
         assert scan_time_2 > scan_time_1
